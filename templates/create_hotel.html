@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yeni Otel Oluştur - YourBookingHub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .file-drop-zone {
+            border: 2px dashed #cbd5e0;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        .file-drop-zone:hover, .file-drop-zone.dragover {
+            border-color: #667eea;
+            background-color: #f7fafc;
+        }
+        .upload-preview {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-4xl w-full space-y-8">
+            <div class="text-center">
+                <h2 class="mt-6 text-3xl font-extrabold text-gray-900">
+                    🏨 Yeni Otel Hesabı Oluştur
+                </h2>
+                <p class="mt-2 text-sm text-gray-600">
+                    Otelin için kişiselleştirilmiş email otomasyonu
+                </p>
+            </div>
+
+            <div class="mt-8 gradient-bg rounded-xl shadow-xl p-8">
+                <form method="POST" enctype="multipart/form-data" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Hotel Information -->
+                        <div class="bg-white rounded-lg p-6 shadow-sm">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                                <i class="fas fa-building text-blue-500 mr-2"></i>
+                                Otel Bilgileri
+                            </h3>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Otel Adı</label>
+                                    <input type="text" name="hotel_name" required
+                                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                           placeholder="Cornelia Diamond Resort & Spa">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Domain Adı</label>
+                                    <input type="text" name="domain_name" required pattern="[a-zA-Z0-9]+"
+                                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                           placeholder="cornelia">
+                                    <p class="mt-1 text-xs text-gray-500">Sadece harf ve rakam</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Admin Information -->
+                        <div class="bg-white rounded-lg p-6 shadow-sm">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                                <i class="fas fa-user-shield text-green-500 mr-2"></i>
+                                Admin Bilgileri
+                            </h3>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Admin Email</label>
+                                    <input type="email" name="admin_email" required
+                                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                           placeholder="admin@corneliahotel.com">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Admin Şifre</label>
+                                    <input type="password" name="admin_password" required
+                                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                           placeholder="Güvenli şifre oluşturun">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Gmail Hesabı</label>
+                                    <input type="email" name="gmail_email"
+                                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                           placeholder="booking@corneliahotel.com">
+                                    <p class="mt-1 text-xs text-gray-500">Email almak için kullanılacak Gmail</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- File Upload Section -->
+                    <div class="bg-white rounded-lg p-6 shadow-sm">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                            <i class="fas fa-upload text-purple-500 mr-2"></i>
+                            Dosya Yükleme (app_complete.py dahil)
+                        </h3>
+                        
+                        <div class="file-drop-zone p-8 text-center" id="dropZone">
+                            <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                            <p class="text-lg font-medium text-gray-700 mb-2">
+                                Dosyaları buraya sürükleyin veya tıklayın
+                            </p>
+                            <p class="text-sm text-gray-500 mb-4">
+                                Python dosyaları (.py), resimler, HTML template'leri, dökümanlar
+                            </p>
+                            <input type="file" name="files" multiple id="fileInput" class="hidden"
+                                   accept=".py,.html,.jpg,.jpeg,.png,.gif,.pdf,.doc,.docx,.txt">
+                            <button type="button" onclick="document.getElementById('fileInput').click()"
+                                    class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
+                                <i class="fas fa-folder-open mr-2"></i>
+                                Dosya Seç
+                            </button>
+                        </div>
+
+                        <!-- File Preview -->
+                        <div id="filePreview" class="upload-preview mt-4 hidden">
+                            <h4 class="text-sm font-medium text-gray-700 mb-2">Yüklenecek Dosyalar:</h4>
+                            <div id="fileList" class="space-y-2"></div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="flex justify-center">
+                        <button type="submit" 
+                                class="group relative w-full md:w-auto flex justify-center py-3 px-8 border border-transparent text-lg font-medium rounded-xl text-white bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200 transform hover:scale-105">
+                            <i class="fas fa-plus-circle mr-2"></i>
+                            Otel Hesabı Oluştur
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="text-center">
+                <a href="/admin/dashboard" class="text-blue-600 hover:text-blue-800 font-medium">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Admin Panel'e Dön
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // File upload functionality
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const filePreview = document.getElementById('filePreview');
+        const fileList = document.getElementById('fileList');
+
+        // Click to upload
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        // Drag and drop
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            fileInput.files = files;
+            updateFilePreview(files);
+        });
+
+        // File input change
+        fileInput.addEventListener('change', (e) => {
+            updateFilePreview(e.target.files);
+        });
+
+        function updateFilePreview(files) {
+            fileList.innerHTML = '';
+            
+            if (files.length > 0) {
+                filePreview.classList.remove('hidden');
+                
+                Array.from(files).forEach(file => {
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'flex items-center justify-between bg-gray-50 p-2 rounded';
+                    
+                    const fileIcon = getFileIcon(file.name);
+                    const fileSize = (file.size / 1024).toFixed(1) + ' KB';
+                    
+                    fileItem.innerHTML = `
+                        <div class="flex items-center">
+                            <i class="${fileIcon} mr-2"></i>
+                            <span class="text-sm font-medium">${file.name}</span>
+                            <span class="text-xs text-gray-500 ml-2">(${fileSize})</span>
+                        </div>
+                        <i class="fas fa-check text-green-500"></i>
+                    `;
+                    
+                    fileList.appendChild(fileItem);
+                });
+            } else {
+                filePreview.classList.add('hidden');
+            }
+        }
+
+        function getFileIcon(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            switch(ext) {
+                case 'py': return 'fab fa-python text-blue-500';
+                case 'html': return 'fab fa-html5 text-orange-500';
+                case 'jpg': case 'jpeg': case 'png': case 'gif': return 'fas fa-image text-green-500';
+                case 'pdf': return 'fas fa-file-pdf text-red-500';
+                case 'doc': case 'docx': return 'fas fa-file-word text-blue-600';
+                case 'txt': return 'fas fa-file-alt text-gray-600';
+                default: return 'fas fa-file text-gray-500';
+            }
+        }
+    </script>
+</body>
+</html>

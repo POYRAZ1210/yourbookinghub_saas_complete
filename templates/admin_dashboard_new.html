@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - YourBookingHub.org</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <!-- Header -->
+    <header class="bg-white shadow">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                        <i class="fas fa-user-shield text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
+                        <p class="text-sm text-gray-600">YourBookingHub.org Sistem Yonetimi</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/" class="text-gray-600 hover:text-blue-600">
+                        <i class="fas fa-home mr-2"></i>Ana Sayfa
+                    </a>
+                    <a href="/admin/logout" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Cikis
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <!-- Stats Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-5">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-hotel text-2xl text-blue-600"></i>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Toplam Otel</dt>
+                                <dd class="text-3xl font-semibold text-gray-900">{{ hotels|length }}</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-5">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-envelope text-2xl text-green-600"></i>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Gunluk Email</dt>
+                                <dd class="text-3xl font-semibold text-gray-900">247</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-5">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-chart-line text-2xl text-purple-600"></i>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Aylik Gelir</dt>
+                                <dd class="text-3xl font-semibold text-gray-900">$1,247</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-5">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-clock text-2xl text-orange-600"></i>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Sistem Uptime</dt>
+                                <dd class="text-3xl font-semibold text-gray-900">99.9%</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hotel Management -->
+        <div class="bg-white shadow overflow-hidden sm:rounded-md mb-8">
+            <div class="px-4 py-5 sm:px-6 flex justify-between items-center">
+                <div>
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">Otel Hesaplari</h3>
+                    <p class="mt-1 max-w-2xl text-sm text-gray-500">Sistem'de kayitli tum otel hesaplari</p>
+                </div>
+                <button onclick="showCreateHotelModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                    <i class="fas fa-plus mr-2"></i>Yeni Otel Ekle
+                </button>
+            </div>
+            
+            <div class="border-t border-gray-200">
+                <ul class="divide-y divide-gray-200">
+                    {% for hotel_id, hotel in hotels.items() %}
+                    <li class="px-4 py-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0 h-12 w-12">
+                                    <div class="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
+                                        <i class="fas fa-hotel text-blue-600"></i>
+                                    </div>
+                                </div>
+                                <div class="ml-4">
+                                    <div class="text-lg font-medium text-gray-900">{{ hotel.name }}</div>
+                                    <div class="text-sm text-gray-500">
+                                        Domain: {{ hotel.domain }} | Plan: {{ hotel.subscription_plan }} | 
+                                        Durum: <span class="{% if hotel.is_active %}text-green-600{% else %}text-red-600{% endif %}">
+                                            {% if hotel.is_active %}Aktif{% else %}Pasif{% endif %}
+                                        </span>
+                                    </div>
+                                    <div class="text-sm text-gray-500">
+                                        {% if hotel.hotel_city %}{{ hotel.hotel_city }} | {% endif %}
+                                        {% if hotel.gmail_email %}Gmail: {{ hotel.gmail_email }} | {% endif %}
+                                        Olusturma: {{ hotel.created_at }}
+                                    </div>
+                                    {% if hotel.files and hotel.files|length > 0 %}
+                                    <div class="text-xs text-blue-600 mt-1">
+                                        <i class="fas fa-paperclip mr-1"></i>{{ hotel.files|length }} dosya yüklendi
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <a href="/dashboard/{{ hotel.domain }}" 
+                                   class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700">
+                                    <i class="fas fa-eye mr-1"></i>Goruntule
+                                </a>
+                                <button onclick="editHotel('{{ hotel_id }}')" 
+                                        class="bg-yellow-600 text-white px-3 py-1 rounded text-sm hover:bg-yellow-700">
+                                    <i class="fas fa-edit mr-1"></i>Duzenle
+                                </button>
+                                <button onclick="toggleHotel('{{ hotel_id }}')" 
+                                        class="{% if hotel.is_active %}bg-red-600 hover:bg-red-700{% else %}bg-green-600 hover:bg-green-700{% endif %} text-white px-3 py-1 rounded text-sm">
+                                    <i class="fas fa-{% if hotel.is_active %}pause{% else %}play{% endif %} mr-1"></i>
+                                    {% if hotel.is_active %}Durdur{% else %}Baslat{% endif %}
+                                </button>
+                            </div>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="bg-white shadow overflow-hidden sm:rounded-md">
+            <div class="px-4 py-5 sm:px-6">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Son Aktiviteler</h3>
+                <p class="mt-1 max-w-2xl text-sm text-gray-500">Sistemdeki son email islemleri ve aktiviteler</p>
+            </div>
+            <div class="border-t border-gray-200">
+                <ul class="divide-y divide-gray-200">
+                    <li class="px-4 py-4">
+                        <div class="flex space-x-3">
+                            <div class="flex-shrink-0">
+                                <div class="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
+                                    <i class="fas fa-envelope text-green-600"></i>
+                                </div>
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-sm font-medium text-gray-900">Cornelia - Yeni email islendi</p>
+                                <p class="text-sm text-gray-500">john.smith@email.com adresinden rezervasyon talebi</p>
+                                <p class="text-xs text-gray-400">2 dakika once</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="px-4 py-4">
+                        <div class="flex space-x-3">
+                            <div class="flex-shrink-0">
+                                <div class="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
+                                    <i class="fas fa-user text-blue-600"></i>
+                                </div>
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-sm font-medium text-gray-900">Rixos - Yeni kullanici girisi</p>
+                                <p class="text-sm text-gray-500">Hotel yoneticisi sisteme giris yapti</p>
+                                <p class="text-xs text-gray-400">15 dakika once</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="px-4 py-4">
+                        <div class="flex space-x-3">
+                            <div class="flex-shrink-0">
+                                <div class="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center">
+                                    <i class="fas fa-cog text-purple-600"></i>
+                                </div>
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-sm font-medium text-gray-900">Sistem - Konfigürasyon guncellendi</p>
+                                <p class="text-sm text-gray-500">Email template'leri guncellendi</p>
+                                <p class="text-xs text-gray-400">1 saat once</p>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <!-- Create Hotel Modal -->
+    <div id="createHotelModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+        <div class="relative top-10 mx-auto p-6 border max-w-4xl shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <h3 class="text-xl font-medium text-gray-900 mb-6">Yeni Otel Hesabi Olustur</h3>
+                <form id="createHotelForm" enctype="multipart/form-data">
+                    
+                    <!-- Basic Information -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <h4 class="text-lg font-medium text-gray-800 mb-4 border-b pb-2">Temel Bilgiler</h4>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Otel Adi *</label>
+                                    <input type="text" name="name" required 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                           placeholder="Ornek: Cornelia Diamond Resort">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Domain *</label>
+                                    <input type="text" name="domain" required 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                           placeholder="Ornek: cornelia (sadece harf ve rakam)">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Gmail Email</label>
+                                    <input type="email" name="gmail_email" 
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                           placeholder="Ornek: booking@hotel.com">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Plan</label>
+                                    <select name="subscription_plan" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                                        <option value="unlimited">Unlimited - Sınırsız</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hotel Customization -->
+                        <div>
+                            <h4 class="text-lg font-medium text-gray-800 mb-4 border-b pb-2">Otel Kişiselleştirme</h4>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Otel Logosu</label>
+                                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-500 transition-colors">
+                                        <input type="file" name="hotel_logo" accept="image/*" id="logoUpload" class="hidden" onchange="handleFileUpload(this, 'logoPreview')">
+                                        <label for="logoUpload" class="cursor-pointer">
+                                            <i class="fas fa-cloud-upload-alt text-2xl text-gray-400 mb-2"></i>
+                                            <p class="text-sm text-gray-600">Logo dosyası seçin</p>
+                                            <p class="text-xs text-gray-400">PNG, JPG (Maks 2MB)</p>
+                                        </label>
+                                        <div id="logoPreview" class="mt-2 hidden">
+                                            <img class="max-w-32 max-h-16 mx-auto rounded" />
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Banner Resmi</label>
+                                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-500 transition-colors">
+                                        <input type="file" name="hotel_banner" accept="image/*" id="bannerUpload" class="hidden" onchange="handleFileUpload(this, 'bannerPreview')">
+                                        <label for="bannerUpload" class="cursor-pointer">
+                                            <i class="fas fa-image text-2xl text-gray-400 mb-2"></i>
+                                            <p class="text-sm text-gray-600">Banner dosyası seçin</p>
+                                            <p class="text-xs text-gray-400">PNG, JPG (Maks 5MB)</p>
+                                        </label>
+                                        <div id="bannerPreview" class="mt-2 hidden">
+                                            <img class="max-w-48 max-h-24 mx-auto rounded" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Tema Rengi</label>
+                                    <div class="flex space-x-2">
+                                        <input type="color" name="theme_color" value="#3B82F6" 
+                                               class="w-12 h-10 border border-gray-300 rounded cursor-pointer">
+                                        <input type="text" value="#3B82F6" 
+                                               class="flex-1 px-3 py-2 border border-gray-300 rounded-md" 
+                                               placeholder="#3B82F6" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hotel Information -->
+                    <div class="mb-6">
+                        <h4 class="text-lg font-medium text-gray-800 mb-4 border-b pb-2">Otel Bilgileri</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Telefon</label>
+                                <input type="tel" name="hotel_phone" 
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                       placeholder="+90 242 123 45 67">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Website</label>
+                                <input type="url" name="hotel_website" 
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                       placeholder="https://hotel.com">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Şehir</label>
+                                <input type="text" name="hotel_city" 
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                       placeholder="Antalya">
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Otel Açıklaması</label>
+                            <textarea name="hotel_description" rows="3" 
+                                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+                                      placeholder="Otel hakkında kısa bir açıklama..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Email Templates -->
+                    <div class="mb-6">
+                        <h4 class="text-lg font-medium text-gray-800 mb-4 border-b pb-2">Email Template Dosyaları</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Türkçe Template</label>
+                                <div class="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center">
+                                    <input type="file" name="template_tr" accept=".html,.htm" id="templateTR" class="hidden">
+                                    <label for="templateTR" class="cursor-pointer">
+                                        <i class="fas fa-file-code text-xl text-gray-400 mb-1"></i>
+                                        <p class="text-sm text-gray-600">TR template (HTML)</p>
+                                    </label>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">İngilizce Template</label>
+                                <div class="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center">
+                                    <input type="file" name="template_en" accept=".html,.htm" id="templateEN" class="hidden">
+                                    <label for="templateEN" class="cursor-pointer">
+                                        <i class="fas fa-file-code text-xl text-gray-400 mb-1"></i>
+                                        <p class="text-sm text-gray-600">EN template (HTML)</p>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex justify-end space-x-3 border-t pt-4">
+                        <button type="button" onclick="hideCreateHotelModal()" 
+                                class="px-6 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors">
+                            <i class="fas fa-times mr-2"></i>İptal
+                        </button>
+                        <button type="submit" 
+                                class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                            <i class="fas fa-plus mr-2"></i>Otel Oluştur
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showCreateHotelModal() {
+            document.getElementById('createHotelModal').classList.remove('hidden');
+        }
+
+        function hideCreateHotelModal() {
+            document.getElementById('createHotelModal').classList.add('hidden');
+        }
+
+        // File upload handler
+        function handleFileUpload(input, previewId) {
+            const file = input.files[0];
+            const preview = document.getElementById(previewId);
+            
+            if (file) {
+                // File size validation
+                const maxSize = input.name === 'hotel_logo' ? 2 * 1024 * 1024 : 5 * 1024 * 1024; // 2MB for logo, 5MB for banner
+                if (file.size > maxSize) {
+                    alert(`Dosya boyutu çok büyük. Maksimum ${maxSize / (1024 * 1024)}MB olmalı.`);
+                    input.value = '';
+                    return;
+                }
+                
+                // Show preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = preview.querySelector('img');
+                    img.src = e.target.result;
+                    preview.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Color picker sync
+        document.addEventListener('DOMContentLoaded', function() {
+            const colorPicker = document.querySelector('input[type="color"]');
+            const colorText = colorPicker?.nextElementSibling;
+            
+            if (colorPicker && colorText) {
+                colorPicker.addEventListener('change', function() {
+                    colorText.value = this.value;
+                });
+            }
+        });
+
+        document.getElementById('createHotelForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            
+            // Show loading state
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Otel oluşturuluyor...';
+            submitBtn.disabled = true;
+            
+            // Create FormData for file uploads
+            const formData = new FormData(e.target);
+            
+            try {
+                const response = await fetch('/admin/create_hotel', {
+                    method: 'POST',
+                    body: formData  // Send FormData directly for file uploads
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    alert('Otel başarıyla oluşturuldu!');
+                    hideCreateHotelModal();
+                    location.reload();
+                } else {
+                    alert('Hata: ' + (result.message || 'Bilinmeyen hata'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Bağlantı hatası oluştu');
+            } finally {
+                // Reset button state
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

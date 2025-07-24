@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ hotel.hotel_name }} - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .status-running {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        .status-stopped {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+        .pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="gradient-bg shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-6">
+                <div class="flex items-center">
+                    <h1 class="text-3xl font-bold text-white">
+                        <i class="fas fa-hotel mr-3"></i>
+                        {{ hotel.hotel_name }}
+                    </h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-white text-right">
+                        <p class="text-sm opacity-90">Hoş geldiniz</p>
+                        <p class="font-semibold">{{ hotel.admin_email }}</p>
+                    </div>
+                    <a href="/hotel/{{ hotel.domain_name }}/logout" 
+                       class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-lg transition duration-200">
+                        <i class="fas fa-sign-out-alt mr-2"></i>
+                        Çıkış
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- System Status Card -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center mr-4">
+                        <i class="fas fa-cogs text-blue-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-900">Email Otomasyonu</h2>
+                        <p class="text-gray-600">Sistem durumu ve kontrolü</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <!-- System Status -->
+                    <div class="flex items-center" id="systemStatus">
+                        <div class="w-3 h-3 rounded-full bg-red-500 mr-2 pulse"></div>
+                        <span class="text-sm font-medium text-gray-700">Durduruldu</span>
+                    </div>
+                    
+                    <!-- Control Buttons -->
+                    <div class="flex space-x-2">
+                        <button onclick="startSystem()" id="startBtn"
+                                class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition duration-200 flex items-center">
+                            <i class="fas fa-play mr-2"></i>
+                            Başlat
+                        </button>
+                        <button onclick="stopSystem()" id="stopBtn"
+                                class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition duration-200 flex items-center disabled:opacity-50" disabled>
+                            <i class="fas fa-stop mr-2"></i>
+                            Durdur
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- System Info -->
+            <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-blue-600">{{ stats.total_processed }}</div>
+                        <div class="text-sm text-gray-600">Bu Ay İşlenen</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-green-600">{{ stats.emails_remaining }}</div>
+                        <div class="text-sm text-gray-600">Kalan Limit</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-purple-600">{{ stats.subscription_type|title }}</div>
+                        <div class="text-sm text-gray-600">Abonelik Tipi</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Today's Emails -->
+            <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-blue-100 text-sm font-medium">Bugün İşlenen</p>
+                        <p class="text-3xl font-bold">{{ stats.today_processed }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-blue-400 bg-opacity-50 rounded-full flex items-center justify-center">
+                        <i class="fas fa-envelope text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pending Emails -->
+            <div class="bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-xl shadow-lg p-6 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-yellow-100 text-sm font-medium">Bekleyen Emailler</p>
+                        <p class="text-3xl font-bold">{{ stats.pending_emails }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-yellow-400 bg-opacity-50 rounded-full flex items-center justify-center">
+                        <i class="fas fa-clock text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Monthly Total -->
+            <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-green-100 text-sm font-medium">Aylık Toplam</p>
+                        <p class="text-3xl font-bold">{{ stats.total_processed }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-green-400 bg-opacity-50 rounded-full flex items-center justify-center">
+                        <i class="fas fa-chart-bar text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Monthly Limit -->
+            <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl shadow-lg p-6 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-purple-100 text-sm font-medium">Aylık Limit</p>
+                        <p class="text-3xl font-bold">{{ stats.monthly_limit }}</p>
+                    </div>
+                    <div class="w-12 h-12 bg-purple-400 bg-opacity-50 rounded-full flex items-center justify-center">
+                        <i class="fas fa-shield-alt text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Gmail Configuration -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-lg font-bold text-gray-900 mb-4">
+                    <i class="fas fa-envelope text-red-500 mr-2"></i>
+                    Gmail Bağlantısı
+                </h3>
+                
+                {% if hotel.gmail_email %}
+                    <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                            <span class="text-sm font-medium">{{ hotel.gmail_email }}</span>
+                        </div>
+                        <button class="text-red-600 hover:text-red-800 text-sm">
+                            Bağlantıyı Kes
+                        </button>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-exclamation-triangle text-yellow-500 text-2xl mb-2"></i>
+                        <p class="text-gray-600 mb-4">Gmail hesabı bağlanmamış</p>
+                        <button class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition duration-200">
+                            <i class="fab fa-google mr-2"></i>
+                            Gmail'e Bağlan
+                        </button>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-lg font-bold text-gray-900 mb-4">
+                    <i class="fas fa-history text-blue-500 mr-2"></i>
+                    Son Aktiviteler
+                </h3>
+                
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-envelope text-blue-500 mr-2"></i>
+                            <span class="text-sm">Yeni email işlendi</span>
+                        </div>
+                        <span class="text-xs text-gray-500">5 dk önce</span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-reply text-green-500 mr-2"></i>
+                            <span class="text-sm">Otomatik yanıt gönderildi</span>
+                        </div>
+                        <span class="text-xs text-gray-500">10 dk önce</span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-cog text-gray-500 mr-2"></i>
+                            <span class="text-sm">Sistem güncellendi</span>
+                        </div>
+                        <span class="text-xs text-gray-500">1 saat önce</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let systemRunning = false;
+
+        function updateSystemStatus(running) {
+            const statusDiv = document.getElementById('systemStatus');
+            const startBtn = document.getElementById('startBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            
+            if (running) {
+                statusDiv.innerHTML = `
+                    <div class="w-3 h-3 rounded-full bg-green-500 mr-2 pulse"></div>
+                    <span class="text-sm font-medium text-gray-700">Çalışıyor</span>
+                `;
+                startBtn.disabled = true;
+                startBtn.classList.add('opacity-50');
+                stopBtn.disabled = false;
+                stopBtn.classList.remove('opacity-50');
+            } else {
+                statusDiv.innerHTML = `
+                    <div class="w-3 h-3 rounded-full bg-red-500 mr-2 pulse"></div>
+                    <span class="text-sm font-medium text-gray-700">Durduruldu</span>
+                `;
+                startBtn.disabled = false;
+                startBtn.classList.remove('opacity-50');
+                stopBtn.disabled = true;
+                stopBtn.classList.add('opacity-50');
+            }
+            systemRunning = running;
+        }
+
+        async function startSystem() {
+            try {
+                const response = await fetch('/hotel/{{ hotel.domain_name }}/start-processing', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    updateSystemStatus(true);
+                    showNotification('Sistem başlatıldı!', 'success');
+                } else {
+                    showNotification(result.error || 'Sistem başlatılamadı', 'error');
+                }
+            } catch (error) {
+                console.error('Error starting system:', error);
+                showNotification('Bağlantı hatası', 'error');
+            }
+        }
+
+        async function stopSystem() {
+            try {
+                const response = await fetch('/hotel/{{ hotel.domain_name }}/stop-processing', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    updateSystemStatus(false);
+                    showNotification('Sistem durduruldu!', 'success');
+                } else {
+                    showNotification(result.error || 'Sistem durdurulamadı', 'error');
+                }
+            } catch (error) {
+                console.error('Error stopping system:', error);
+                showNotification('Bağlantı hatası', 'error');
+            }
+        }
+
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 ${
+                type === 'success' ? 'bg-green-500' : 'bg-red-500'
+            } text-white`;
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} mr-2"></i>
+                    ${message}
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Initialize system status
+        updateSystemStatus(false);
+    </script>
+</body>
+</html>
